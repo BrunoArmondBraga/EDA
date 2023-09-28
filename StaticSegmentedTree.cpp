@@ -1,8 +1,3 @@
-/* AS(S): cria uma árvore de segmentos para o conjunto S de intervalos
-Segments(r,x): devolve uma lista com os segmentos na AS r que contém x
-print_debug(r): imprime a AS r, com a lista de segmentos para cada nó
- */
-
 #include <iostream>
 #include <stdlib.h>
 #include <string>
@@ -15,7 +10,6 @@ using namespace std;
 
 class Node{       
     public:
-        int val;
         Node *esq;
         Node *dir;
 
@@ -26,8 +20,7 @@ class Node{
 
         vector<int> segmentos;
 
-        Node() { 
-            val = 0;
+        Node() {
             esq = nullptr;
             dir = nullptr;
         };
@@ -35,7 +28,6 @@ class Node{
         Node(int v) { 
             esq = nullptr;
             dir = nullptr;
-            this->val = v;
         };
         
         ~Node() {
@@ -54,17 +46,11 @@ class Node{
             for(int i = 0; i < segmentos.size(); i++){
                 cout << segmentos[i] << " ";
             }
-            //cout << endl;
         }
 };
  
 class StaticSegmentedTree {
     private:
-
-        void sort_and_remove_duplicates(){
-            //sort(segmentos.begin(), segmentos.end());
-            //segmentos.erase(unique(segmentos.begin(), segmentos.end()), segmentos.end());
-        }
 
         void create_tree(int t){
             int x = 1;
@@ -72,8 +58,6 @@ class StaticSegmentedTree {
                 x = x * 2;
             }
             int resto = t - x;
-            /* cout << "t = " << t << endl;
-            cout << "resto = " << resto << endl; */
             this->root = create_tree_skeleton(x);
             put_leafs(this->root, resto);
         }
@@ -97,7 +81,7 @@ class StaticSegmentedTree {
             if(t <= 0){
                 return;
             }
-            //cout << "t = " << t << endl;
+
             if(node->esq != nullptr){
                 put_leafs(node->esq,t);
             }
@@ -121,25 +105,6 @@ class StaticSegmentedTree {
                 cout << segmentos[i] << " ";
             }
             cout << endl;
-        }
-
-        void debug_rec(Node *u, int i){
-            if(u->esq != nullptr){
-                debug_rec(u->esq, i+3);
-            }
-
-            for(int j=0;j<i;j++){
-                cout << " ";
-            }
-            cout << u->val;
-            if(u->esq == nullptr && u->dir == nullptr){
-                cout << "+++++";
-            }
-            cout << endl;
-
-            if(u->dir != nullptr){
-                debug_rec(u->dir, i+3);
-            }   
         }
 
         void debug_rec_filling(Node *u, int i){
@@ -175,9 +140,6 @@ class StaticSegmentedTree {
             else{
                 cout << "]";
             }
-            /* if(u->esq == nullptr && u->dir == nullptr){
-                cout << "======";
-            } */
             u->print_segmentos();
             cout << endl;
 
@@ -218,7 +180,6 @@ class StaticSegmentedTree {
 
         void put_segments(){
             for(int i = 0; i < intervalos.size()/2; i++){
-                //cout << "segmento [" << i << "]" << "com os seguinte intervalo = " << intervalos[i*2] << "," << intervalos[(i*2) + 1] << endl;
                 put_segment(this->root, intervalos[i*2], intervalos[(i*2)+1], i+1);
             }
         }
@@ -228,7 +189,6 @@ class StaticSegmentedTree {
                 return;
             }
 
-            //casos de adicionar por inteiro!!!
             if(a <= u->num_esq && b >= u->num_dir){
                 u->segmentos.push_back(name);
                 return;
@@ -267,10 +227,6 @@ class StaticSegmentedTree {
             return true;
         }
 
-        void print_debug(){
-            debug_rec(this->root,0);
-        }
-
     public:
         Node *root;
         vector<int> intervalos;
@@ -281,20 +237,15 @@ class StaticSegmentedTree {
             vector<int> segmentos = segments;
             segmentos.push_back(INT_MIN);
             segmentos.push_back(INT_MAX);
-            //print_debug_segmentos(segmentos);
 
             sort(segmentos.begin(), segmentos.end());
             segmentos.erase(unique(segmentos.begin(), segmentos.end()), segmentos.end());
 
-            //print_debug_segmentos(segmentos);
             int number_of_different_extremes = 2 * (segmentos.size() - 2) + 1;
             create_tree(number_of_different_extremes);
-            //print_debug();
             int a = 0;
             numera_preenchendo(this->root, a, segmentos);
-            //print();
             put_segments();
-            //print();
         }
 
         ~StaticSegmentedTree(){
@@ -349,8 +300,6 @@ int main(){
         vec.push_back(b);
     }
 
-    //vector<int> vec = {1, 2, 3, 5, 7, 8};
-    //cout << "size = " << vec[0] << endl;
     StaticSegmentedTree SST = StaticSegmentedTree(vec);
     while(cin >> n){
         switch (n)
@@ -362,7 +311,6 @@ int main(){
         case 2:
             SST.print();
             break;
-        
         };
     }
 }

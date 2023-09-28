@@ -5,13 +5,11 @@
 #include <algorithm>
 #include <climits>
 #include <cmath>
-#include <stack>
 
 using namespace std;
 
 class Node{       
     public:
-        int val;
         Node *esq;
         Node *dir;
 
@@ -22,8 +20,7 @@ class Node{
 
         vector<int> segmentos;
 
-        Node() { 
-            val = 0;
+        Node() {
             esq = nullptr;
             dir = nullptr;
         };
@@ -31,17 +28,9 @@ class Node{
         Node(int v) { 
             esq = nullptr;
             dir = nullptr;
-            this->val = v;
         };
         
-        ~Node() {
-            /* if(esq != nullptr){
-                delete esq;
-            }
-            if(dir != nullptr){
-                delete dir;
-            } */
-        }
+        ~Node(){}
 
         void print_segmentos(int before){
             if(segmentos.size() != 0){
@@ -50,7 +39,6 @@ class Node{
             for(int i = 0; i < segmentos.size(); i++){
                 cout << segmentos[i]+before << " ";
             }
-            //cout << endl;
         }
 };
  
@@ -102,32 +90,6 @@ class StaticSegmentedTree {
             }
         }
 
-        void print_debug_segmentos(vector<int> segmentos){
-            for (int i = 0; i < segmentos.size(); i++) {
-                cout << segmentos[i] << " ";
-            }
-            cout << endl;
-        }
-
-        void debug_rec(Node *u, int i){
-            if(u->esq != nullptr){
-                debug_rec(u->esq, i+3);
-            }
-
-            for(int j=0;j<i;j++){
-                cout << " ";
-            }
-            cout << u->val;
-            if(u->esq == nullptr && u->dir == nullptr){
-                cout << "+++++";
-            }
-            cout << endl;
-
-            if(u->dir != nullptr){
-                debug_rec(u->dir, i+3);
-            }   
-        }
-
         void debug_rec_filling(Node *u, int i, int before=0){
             if(u->esq != nullptr){
                 debug_rec_filling(u->esq, i+3, before);
@@ -161,9 +123,6 @@ class StaticSegmentedTree {
             else{
                 cout << "]";
             }
-            /* if(u->esq == nullptr && u->dir == nullptr){
-                cout << "======";
-            } */
             u->print_segmentos(before);
             cout << endl;
 
@@ -251,14 +210,9 @@ class StaticSegmentedTree {
             return true;
         }
 
-        void print_debug(){
-            debug_rec(this->root,0);
-        }
-
     public:
         Node *root;
         vector<int> intervalos;
-        
 
         StaticSegmentedTree(vector<int> segments){
             intervalos = segments;
@@ -276,11 +230,7 @@ class StaticSegmentedTree {
             put_segments();
         }
 
-        ~StaticSegmentedTree(){
-            /* if(this->root != nullptr){
-                delete root;
-            } */
-        }
+        ~StaticSegmentedTree(){}
 
         void print(int antes=0){
             debug_rec_filling(this->root,0, antes);
@@ -375,8 +325,7 @@ class DynamicSegmentedTree {
             this->binaryNumber = "0";
         }
 
-        ~DynamicSegmentedTree(){
-        }
+        ~DynamicSegmentedTree(){}
 
         void add(int a, int b){
             if(binaryNumber == "0"){
