@@ -43,12 +43,12 @@ class Node{
             } */
         }
 
-        void print_segmentos(){
+        void print_segmentos(int before){
             if(segmentos.size() != 0){
                 cout << " ";
             }
             for(int i = 0; i < segmentos.size(); i++){
-                cout << segmentos[i] << " ";
+                cout << segmentos[i]+before << " ";
             }
             //cout << endl;
         }
@@ -56,20 +56,12 @@ class Node{
  
 class StaticSegmentedTree {
     private:
-
-        void sort_and_remove_duplicates(){
-            //sort(segmentos.begin(), segmentos.end());
-            //segmentos.erase(unique(segmentos.begin(), segmentos.end()), segmentos.end());
-        }
-
         void create_tree(int t){
             int x = 1;
             while(x*2 < t){
                 x = x * 2;
             }
             int resto = t - x;
-            /* cout << "t = " << t << endl;
-            cout << "resto = " << resto << endl; */
             this->root = create_tree_skeleton(x);
             put_leafs(this->root, resto);
         }
@@ -93,14 +85,12 @@ class StaticSegmentedTree {
             if(t <= 0){
                 return;
             }
-            //cout << "t = " << t << endl;
             if(node->esq != nullptr){
                 put_leafs(node->esq,t);
             }
             else{
                 node->esq = new Node();
             }
-
             if(node->dir != nullptr){
                 put_leafs(node->dir,t);
             }
@@ -138,9 +128,9 @@ class StaticSegmentedTree {
             }   
         }
 
-        void debug_rec_filling(Node *u, int i){
+        void debug_rec_filling(Node *u, int i, int before=0){
             if(u->esq != nullptr){
-                debug_rec_filling(u->esq, i+3);
+                debug_rec_filling(u->esq, i+3, before);
             }
 
             for(int j=0;j<i;j++){
@@ -174,12 +164,12 @@ class StaticSegmentedTree {
             /* if(u->esq == nullptr && u->dir == nullptr){
                 cout << "======";
             } */
-            u->print_segmentos();
+            u->print_segmentos(before);
             cout << endl;
 
 
             if(u->dir != nullptr){
-                debug_rec_filling(u->dir, i+3);
+                debug_rec_filling(u->dir, i+3, before);
             }   
         }
 
@@ -214,7 +204,6 @@ class StaticSegmentedTree {
 
         void put_segments(){
             for(int i = 0; i < intervalos.size()/2; i++){
-                //cout << "segmento [" << i << "]" << "com os seguinte intervalo = " << intervalos[i*2] << "," << intervalos[(i*2) + 1] << endl;
                 put_segment(this->root, intervalos[i*2], intervalos[(i*2)+1], i+1);
             }
         }
@@ -224,7 +213,6 @@ class StaticSegmentedTree {
                 return;
             }
 
-            //casos de adicionar por inteiro!!!
             if(a <= u->num_esq && b >= u->num_dir){
                 u->segmentos.push_back(name);
                 return;
@@ -277,20 +265,15 @@ class StaticSegmentedTree {
             vector<int> segmentos = segments;
             segmentos.push_back(INT_MIN);
             segmentos.push_back(INT_MAX);
-            //print_debug_segmentos(segmentos);
 
             sort(segmentos.begin(), segmentos.end());
             segmentos.erase(unique(segmentos.begin(), segmentos.end()), segmentos.end());
 
-            //print_debug_segmentos(segmentos);
             int number_of_different_extremes = 2 * (segmentos.size() - 2) + 1;
             create_tree(number_of_different_extremes);
-            //print_debug();
             int a = 0;
             numera_preenchendo(this->root, a, segmentos);
-            //print();
             put_segments();
-            //print();
         }
 
         ~StaticSegmentedTree(){
@@ -299,17 +282,17 @@ class StaticSegmentedTree {
             } */
         }
 
-        void print(){
-            debug_rec_filling(this->root,0);
+        void print(int antes=0){
+            debug_rec_filling(this->root,0, antes);
         }
 
-        void find_time(int t){
+        vector<int> find_time(int t, int before = 0){
             vector<int> segments_in_time;
             Node *u = this->root;
             while(u != nullptr && u->num_esq <= t <= u->num_dir){
                 if(u->segmentos.size() != 0){
                     for(int i = 0; i < u->segmentos.size(); i++){
-                        segments_in_time.push_back(u->segmentos[i]);
+                        segments_in_time.push_back(u->segmentos[i] + before);
                     }
                 }
                 if(included(u->esq,t)){
@@ -319,21 +302,15 @@ class StaticSegmentedTree {
                     u = u->dir;
                 }
             }
-
-            if(segments_in_time.size() == 0){
-                cout << "nenhum segmento";
-            }
-            else{
-                sort(segments_in_time.begin(), segments_in_time.end());
-                for(int i = 0; i < segments_in_time.size(); i++){
-                    cout << segments_in_time[i] << " ";
-                }
-            }
-            cout << endl;
+            return segments_in_time;
         }
 
         vector<int> return_intervalos(){
             return intervalos;
+        }
+
+        int return_size(){
+            return intervalos.size()/2;
         }
 };
 
@@ -342,7 +319,7 @@ class DynamicSegmentedTree {
     private:
         int addOneToBinary() {
             string result = this->binaryNumber;
-            int carry = 1; // Inicialmente, o carry é 1 para a adição de 1
+            int carry = 1;
             int mudancas = 0;
 
             for (int i = this->binaryNumber.size() - 1; i >= 0; i--) {
@@ -360,8 +337,6 @@ class DynamicSegmentedTree {
                 result = '1' + result;
             }
 
-            cout << endl;
-            cout << "numero de mudancas = " << mudancas << endl;
             this->binaryNumber = result;
             return mudancas;
         }
@@ -385,13 +360,6 @@ class DynamicSegmentedTree {
                     final_vector.push_back(novo_vetor[j]);
                 }
             }
-            cout << endl;
-
-            cout << "Imprime todos os segmentos colocados" << endl;
-            for(int i = 0; i < final_vector.size(); i++){
-                cout << final_vector[i] << " ";
-            }
-            cout << endl;
 
             this->trees.erase(this->trees.end() - n, this->trees.end()); // Remove os últimos 'n' elementos
             return final_vector;
@@ -402,7 +370,7 @@ class DynamicSegmentedTree {
         int size;
         string binaryNumber;
 
-        DynamicSegmentedTree(vector<int> segments){
+        DynamicSegmentedTree(){
             size = 1;
             this->binaryNumber = "0";
         }
@@ -432,25 +400,43 @@ class DynamicSegmentedTree {
             
         }
 
-        void find_time(int a){
+        void find_times(int a){
+            vector<int> found;
+            int number_of_printed_segments = 0;
+            for(int i = 0; i < trees.size(); i++){
+                vector<int> segments_in_tree = trees[i].find_time(a, number_of_printed_segments);
+                for(int j = 0; j < segments_in_tree.size(); j++){
+                    found.push_back(segments_in_tree[j]);
+                }
+                number_of_printed_segments = number_of_printed_segments + trees[i].return_size();
+            }
 
+            if(found.size() == 0){
+                cout << "nenhum segmento";
+            }
+            else{
+                sort(found.begin(), found.end());
+                for(int i = 0; i < found.size(); i++){
+                    cout << found[i] << " ";
+                }
+            }
+            cout << endl;
         }
 
         void print(){
+            int number_of_printed_segments = 0;
             for(int i = 0; i < trees.size(); i++){
-                trees[i].print();
+                trees[i].print(number_of_printed_segments);
                 cout << endl;
+                number_of_printed_segments = number_of_printed_segments + trees[i].return_size();
             }
         }
 };
 
-
 int main(){
     int a, b, n;
 
-    vector<int> vec = {0,1,2,3,4,5};
-
-    DynamicSegmentedTree DST = DynamicSegmentedTree(vec);
+    DynamicSegmentedTree DST = DynamicSegmentedTree();
     while(cin >> n){
         switch (n)
         {
@@ -463,12 +449,10 @@ int main(){
             else{
                 DST.add(a,b);
             }
-            //DST.add(1,2);
-            cout << DST.binaryNumber << endl;
             break;
         case 2:
             cin >> a;
-            DST.find_time(a);
+            DST.find_times(a);
             break;
         case 3:
             DST.print();
