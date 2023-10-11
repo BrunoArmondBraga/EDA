@@ -63,6 +63,7 @@ private:
     }
 
 public:
+    MaxHeap(){}
     MaxHeap(vector<int>* symbol_table, vector<int>* hash_table, int* time) {
         TS = symbol_table;
         hash = hash_table;
@@ -196,7 +197,159 @@ public:
     }
 };
 
+struct Certificate{
+    int position;
+    int expiration_date;
+};
+
 class MinHeap {
+private:
+    std::vector<Certificate> heap;
+    std::vector<int>* min_hash;
+    
+
+    void heapify(int index) {
+        int smallest = index;
+        int left_child = 2 * index + 1;
+        int right_child = 2 * index + 2;
+
+        if (left_child < heap.size() && heap[left_child].expiration_date < heap[smallest].expiration_date) {
+            smallest = left_child;
+        }
+
+        if (right_child < heap.size() && heap[right_child].expiration_date < heap[smallest].expiration_date) {
+            smallest = right_child;
+        }
+
+        if (smallest != index) {
+            troca_interna(index, smallest);
+            heapify(smallest);
+        }
+    }
+
+    void troca_interna(int index1, int index2) {
+        cout << "TROCA DO MIN HEAP!!" << endl;
+        for(int i = 0; i < min_hash->size(); i++){
+            cout << "i = " << i << " " << min_hash->at(i) << endl;
+        }
+        cout << "index 1 e 2 = " << index1 << index2 << endl;
+
+        swap(heap[index1], heap[index2]);
+
+        int aux = min_hash->at(index1);
+        min_hash->at(index1) = min_hash->at(index2);
+        min_hash->at(index2) = aux;
+        print_hash();
+    }
+
+public:
+    MinHeap(){}
+    MinHeap(vector<int>* hash_table) {
+        min_hash = hash_table;
+    }
+    void insert(int position, int date) {
+        struct Certificate certificado = {position, date};
+        if(min_hash->empty()){
+            min_hash->push_back(0);
+        }
+        else{
+            min_hash->push_back(min_hash->size());
+        }
+        
+        heap.push_back(certificado);
+        int index = heap.size() - 1;
+
+        while (index > 0) {
+            int parent_index = (index - 1) / 2;
+            if (heap[index].expiration_date < heap[parent_index].expiration_date) {
+                troca_interna(index, parent_index);
+                index = parent_index;
+            } else {
+                break;
+            }
+        }
+    }
+
+    void extractMin() {
+        if (heap.empty()) {
+            return;
+        }
+
+        heap[0] = heap.back();
+        heap.pop_back();
+        heapify(0);
+    }
+
+    int getMin() {
+        if (heap.empty()) {
+            throw std::runtime_error("Heap is empty.");
+        }
+        return heap[0].expiration_date;
+    }
+
+    bool isEmpty() {
+        return heap.empty();
+    }
+
+    void print(){
+        for(int i = 0; i < heap.size(); i++){
+            cout << "[" << i << "] = (" << heap[i].position << " " << heap[i].expiration_date << ")" << endl;
+        }
+        cout << endl;
+    }
+
+    void updateKey(int position, int newExpirationDate) {
+        // Encontrar o índice do struct com a posição dada
+        int index = -1;
+        for (int i = 0; i < heap.size(); i++) {
+            if (heap[i].position == position) {
+                index = i;
+                break;
+            }
+        }
+
+        if (index == -1) {
+            // O struct com a posição especificada não foi encontrado
+            throw std::runtime_error("Certificate not found.");
+        }
+
+        // Atualize o valor do expiration_date
+        heap[index].expiration_date = newExpirationDate;
+
+        // Verifique se a atualização violou a propriedade do heap
+        int parent_index = (index - 1) / 2;
+        if (index > 0 && heap[index].expiration_date < heap[parent_index].expiration_date) {
+            // Reorganize o elemento para cima
+            while (index > 0 && heap[index].expiration_date < heap[parent_index].expiration_date) {
+                std::swap(heap[index], heap[parent_index]);
+                index = parent_index;
+                parent_index = (index - 1) / 2;
+            }
+        } else {
+            // Reorganize o elemento para baixo
+            heapify(index);
+        }
+    }
+
+    void print_cru(){
+        cout << "----- PRINT CRU" << endl;
+        for (int i = 0; i < heap.size(); i++) {
+            //cout << "[" << i << "] = " << heap[i] << endl;
+            cout << "[" << i << "] = (" << heap[i].position << " " << heap[i].expiration_date << ")" << endl;
+        }
+        cout << "----- PRINT CRU" << endl;
+        cout << endl;
+    }
+
+    void print_hash(){
+        for(int i = 0; i < min_hash->size(); i++){
+            cout << "i = " << i << " " << min_hash->at(i) << endl;
+        }
+    }
+
+};
+
+class MinHeap_original {
 private:
     std::vector<int> heap;
 
@@ -266,20 +419,22 @@ public:
     }
 };
 
-int main() {
-    vector<int> symbol_table;
-    vector<int> max_hash_table;
-    int time = 0;
-    MaxHeap maxHeap(&symbol_table, &max_hash_table, &time);
+class KinecticHeap{
+    public:
+        vector<int> symbol_table;
+        vector<int> max_hash_table;
+        vector<int> min_hash_table;
+        MaxHeap maxHeap;
+        MinHeap minheap;
+        int time;
 
-    int n, x, v;
-    cout << "Escolha o número de elementos a adicionar:";
-    cin >> n;
-    
-    for(int i = 0; i < n; i++){
-        cin >> x;
-        cin >> v;
+    KinecticHeap(){
+        time = 0;
+        maxHeap = MaxHeap(&symbol_table, &max_hash_table, &time);
+        minheap = MinHeap(&min_hash_table);
+    }
 
+    void Insert_inicial_certificates(int x, int v){
         symbol_table.push_back(x);
         symbol_table.push_back(v);
         max_hash_table.push_back(max_hash_table.size());
@@ -287,18 +442,33 @@ int main() {
         maxHeap.print();
     }
 
-    for(int i = 0; i < max_hash_table.size(); i++){
-        cout << "i = " << i << "  =  " << max_hash_table[i] << endl;
+};
+
+
+int main() {
+    KinecticHeap Heap_cinetico = KinecticHeap();
+    int n, x, v;
+    cout << "Escolha o número de elementos a adicionar:";
+    cin >> n;
+    
+    for(int i = 0; i < n; i++){
+        cin >> x;
+        cin >> v;
+        Heap_cinetico.Insert_inicial_certificates(x,v);
     }
-    maxHeap.print_cru();
+
+    for(int i = 0; i < Heap_cinetico.max_hash_table.size(); i++){
+        cout << "i = " << i << "  =  " << Heap_cinetico.max_hash_table[i] << endl;
+    }
+    Heap_cinetico.maxHeap.print_cru();
 
     //esboço da função update:
     //caso chamassemos update(0)
     //entrada A -> D -> B -> C
     // A=1,1 B=4,0 C=9,-1 D=2,-1
     cout << "ANTES DA MUDANÇA!" << endl;
-    for(int i = 0; i < symbol_table.size(); i = i + 2){
-        cout << "[" << i/2 << "] = (" << symbol_table[i] << "," << symbol_table[i+1] << ")" << endl;
+    for(int i = 0; i < Heap_cinetico.symbol_table.size(); i = i + 2){
+        cout << "[" << i/2 << "] = (" << Heap_cinetico.symbol_table[i] << "," << Heap_cinetico.symbol_table[i+1] << ")" << endl;
     }
     /* cout << "me fala qual item deseja mudar: ";
     int id;
@@ -320,9 +490,28 @@ int main() {
     maxHeap.print_cru(); */
 
     cout << "teste tabela de hash!" << endl;
-    for(int i = 0; i < max_hash_table.size(); i++){
-        cout << "[" << i << "] = " << max_hash_table[i] << endl;
+    for(int i = 0; i < Heap_cinetico.max_hash_table.size(); i++){
+        cout << "[" << i << "] = " << Heap_cinetico.max_hash_table[i] << endl;
     }
+
+    for(int i = 0; i < 10; i++){
+        cout << endl;
+    }
+
+    vector<int> min_hash_table;
+    MinHeap minheap = MinHeap(&min_hash_table);
+    minheap.insert(1,8);
+    minheap.insert(2,2);
+    minheap.insert(3,4);
+    minheap.insert(4,1);
+    cout << "oi" << minheap.getMin() << endl;
+    minheap.print_cru();
+
+    cout << "-----" << endl;
+
+    minheap.updateKey(4,12);
+    minheap.print_cru();
+    
 
     return 0;
 }
