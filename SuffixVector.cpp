@@ -326,19 +326,19 @@ void compare_pred(int& L, int& R, int& l, int& r, int M, int init, vector<int> l
 
 int predecessor(string P, vector<int> lcp, vector<int> llcp, vector<int> rlcp, string T){
 
-    int s = lcp[2];
-    int l = 0;
-
-    while(l < P.size() && P[l] == T[s + l]){
-        l++;
-    }
-
-    if(l == P.size() || P[l] < T[s + l]){
-        return 1;
-    }
-
-    l = 0;
+    int s = lcp[T.size()];
     int r = 0;
+
+    while(r < P.size() && P[r] == T[s + r]){
+        r++;
+    }
+
+    //if(r == P.size() || P[r] > T[s + r]){
+    if(P[r] > T[s + r]){
+        return T.size();
+    }
+
+    int l = 0;
     int L = 1;
     int R = T.size();
     while(L < R - 1){
