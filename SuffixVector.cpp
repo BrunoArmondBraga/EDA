@@ -166,7 +166,7 @@ void create_lrlcp(int i, int j, bool side_right, vector<int>& lcp, vector<int>& 
     }
 }
 
-void compare(int& L, int& R, int& l, int& r, int M, int init, vector<int> lcp, string p, string text){
+void compare_suc(int& L, int& R, int& l, int& r, int M, int init, vector<int> lcp, string p, string text){
     cout << "L = (" << L << " , " << l << ")   ,   R = (" << R << " , " << r << ")   ,   M =  " << M << endl;
 
     int index = init;
@@ -189,13 +189,16 @@ void compare(int& L, int& R, int& l, int& r, int M, int init, vector<int> lcp, s
         } */
 
         if(index == p.size()){
+            L = M;
+            l = index;
+            break;
             if(text[first_letter_suffix + index] == '$'){
-                R = M + 1;
-                L = R - 1;
+                //R = M + 1;
+                //L = R - 1;
             }
             else{
-                R = M;
-                r = index;
+                //R = M;
+                //r = index;
             }
             break;
         }
@@ -228,16 +231,16 @@ int sucessor(string P, vector<int> lcp, vector<int> llcp, vector<int> rlcp, stri
         r++;
     }
 
-    /* if(r == P.size() || P[r] > T[s + r]){
+    if(r == P.size() || P[r] > T[s + r]){
         return T.size() + 1;
-    } */
+    }
 
-    if(r == P.size() && s + r + 1 == T.size()){
+    /* if(r == P.size() && s + r + 1 == T.size()){
         return T.size() + 1;
     }
     if(r != P.size() && P[r] > T[s + r]){
         return T.size() + 1;
-    }
+    } */
     
 
 
@@ -250,7 +253,7 @@ int sucessor(string P, vector<int> lcp, vector<int> llcp, vector<int> rlcp, stri
 
          if(l == r){
             //compara p e M a partir de l
-            compare(L,R, l, r, M, l, lcp, P, T);
+            compare_suc(L,R, l, r, M, l, lcp, P, T);
         }
 
 
@@ -265,7 +268,7 @@ int sucessor(string P, vector<int> lcp, vector<int> llcp, vector<int> rlcp, stri
             }
             else{
                 //começa a comparar P e M de l
-                compare(L, R, l, r, M, l, lcp, P, T);
+                compare_suc(L, R, l, r, M, l, lcp, P, T);
             }
         }
 
@@ -280,11 +283,105 @@ int sucessor(string P, vector<int> lcp, vector<int> llcp, vector<int> rlcp, stri
             }
             else{
                 //começa a comparar P e M de l
-                compare(L, R, l, r, M, r, lcp, P, T);
+                compare_suc(L, R, l, r, M, r, lcp, P, T);
             }
         }
     }
     return R;
+}
+
+void compare_pred(int& L, int& R, int& l, int& r, int M, int init, vector<int> lcp, string p, string text){
+    cout << "L = (" << L << " , " << l << ")   ,   R = (" << R << " , " << r << ")   ,   M =  " << M << endl;
+
+    int index = init;
+    int first_letter_suffix = lcp[M];
+
+    while(true){
+        cout << "comparando " << p[index] << "  com  " << text[first_letter_suffix + index] << endl;
+
+        if(index == p.size()){
+            R = M;
+            r = index;
+            break;
+        }
+
+        
+        if(p[index] == text[first_letter_suffix + index]){
+            index++;
+        }
+        else if(p[index] > text[first_letter_suffix + index]){
+            L = M;
+            l = index;
+            break;
+        }
+        else{
+            R = M;
+            r = index;
+            break;
+        }
+    }
+    cout << "fui!" << endl;
+    return;
+}
+
+int predecessor(string P, vector<int> lcp, vector<int> llcp, vector<int> rlcp, string T){
+
+    int s = lcp[2];
+    int l = 0;
+
+    while(l < P.size() && P[l] == T[s + l]){
+        l++;
+    }
+
+    if(l == P.size() || P[l] < T[s + l]){
+        return 1;
+    }
+
+    l = 0;
+    int r = 0;
+    int L = 1;
+    int R = T.size();
+    while(L < R - 1){
+
+        int M = (L + R) / 2;
+
+         if(l == r){
+            //compara p e M a partir de l
+            compare_pred(L,R, l, r, M, l, lcp, P, T);
+        }
+
+
+        else if(l > r){
+
+            if(l < llcp[M - 1]){
+                L = M ;
+            }
+            else if(llcp[M - 1] < l){
+                R = M;
+                r = llcp[M - 1];
+            }
+            else{
+                //começa a comparar P e M de l
+                compare_pred(L, R, l, r, M, l, lcp, P, T);
+            }
+        }
+
+        else{
+
+            if(r < rlcp[M-1]){
+                R = M;
+            }
+            else if(rlcp[M-1] < r){
+                L = M;
+                l = rlcp[M-1];
+            }
+            else{
+                //começa a comparar P e M de l
+                compare_pred(L, R, l, r, M, r, lcp, P, T);
+            }
+        }
+    }
+    return L;
 }
 
 int main() {
@@ -338,10 +435,11 @@ int main() {
     while(true){
         cin >> teste;
         int fim = sucessor(teste, inteiros, llcp, rlcp, palavra);
-        cout << "resultado = " << fim << endl;
-
+        cout << "sucessor = " << fim << endl;
+        int pred = predecessor(teste, inteiros, llcp, rlcp, palavra);
+        cout << "predecessor = " << pred << endl;
+        cout << endl;
     }
-
 
     return 0;
 }
